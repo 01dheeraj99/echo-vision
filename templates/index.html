@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoVision - AI Vision & Speech for Accessibility</title>
+  <meta name="description" content="AI-powered assistive technology transforming visual scenes and images into rich spoken audio and detailed text summaries for visually impaired users.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Skip to Main Content for Screen Readers -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">EchoVision</h1>
+          <p class="brand-subtitle">AI Vision & Speech Accessibility Assistant</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <!-- High Contrast Mode Toggle -->
+        <button id="contrast-toggle" class="btn btn-secondary btn-icon" aria-label="Toggle High Contrast Mode" title="Toggle High Contrast Mode (Alt + H)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path>
+          </svg>
+          <span class="btn-text">High Contrast</span>
+        </button>
+        <!-- Font Size Adjuster -->
+        <button id="font-increase" class="btn btn-secondary btn-sm" aria-label="Increase text size" title="Increase text size">A+</button>
+        <button id="font-reset" class="btn btn-secondary btn-sm" aria-label="Reset text size" title="Reset text size">A</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Accessibility Announcer -->
+  <div id="sr-announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Main Content -->
+  <main id="main-content" class="main-container" role="main">
+    
+    <!-- Introduction Section -->
+    <section class="intro-section" aria-labelledby="intro-heading">
+      <h2 id="intro-heading" class="sr-only">About EchoVision</h2>
+      <div class="banner-card">
+        <p class="intro-text">
+          Upload any picture or take a live camera snapshot. EchoVision detects objects, captions the scene, reads embedded text, and speaks the narration aloud.
+        </p>
+        <div class="shortcuts-hint" aria-label="Keyboard Shortcuts">
+          <span>Keyboard: <kbd>U</kbd> Upload &bull; <kbd>C</kbd> Camera &bull; <kbd>Space</kbd> Play/Pause Audio &bull; <kbd>S</kbd> Coffee Sample</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload & Camera Control Section -->
+    <section class="input-section" aria-labelledby="input-heading">
+      <h2 id="input-heading" class="section-title">Provide an Image</h2>
+
+      <div class="input-grid">
+        <!-- Drag & Drop Zone -->
+        <div class="card dropzone-card" id="dropzone" tabindex="0" role="region" aria-label="Image drop zone and file selector">
+          <input type="file" id="file-input" accept="image/*" class="file-input-hidden" aria-label="Choose image file to analyze">
+          <div class="dropzone-content">
+            <div class="upload-icon" aria-hidden="true">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <h3 class="dropzone-title">Drag & Drop Image Here</h3>
+            <p class="dropzone-sub">or click to browse from your device</p>
+            <p class="dropzone-formats">Supported: JPEG, PNG, WEBP, BMP, GIF (Up to 16MB)</p>
+            <button type="button" class="btn btn-primary" id="browse-btn" aria-label="Browse image files">
+              Select Image File
+            </button>
+          </div>
+        </div>
+
+        <!-- Camera & Samples Side Card -->
+        <div class="card actions-card">
+          <h3 class="card-title">Quick Actions</h3>
+          <p class="card-desc">Capture directly from your webcam or test with included sample images.</p>
+
+          <div class="action-buttons">
+            <button id="camera-toggle-btn" class="btn btn-secondary btn-full" aria-label="Open camera to capture live image">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+                <circle cx="12" cy="13" r="3"></circle>
+              </svg>
+              <span>Use Webcam</span>
+            </button>
+
+            {% if samples and samples|length > 0 %}
+            <div class="sample-actions">
+              <span class="sample-label">Included Samples:</span>
+              <div class="sample-pill-group">
+                {% for sample in samples %}
+                <button type="button" class="btn btn-outline sample-btn" data-sample="{{ sample }}" aria-label="Test sample image: {{ sample }}">
+                  &ldquo;{{ sample }}&rdquo;
+                </button>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Camera Stream Modal / View -->
+      <div id="camera-container" class="card camera-card hidden" aria-hidden="true" role="dialog" aria-label="Live webcam capture">
+        <h3 class="card-title">Live Camera Capture</h3>
+        <div class="camera-viewport">
+          <video id="webcam-video" autoplay playsinline aria-label="Webcam live video feed"></video>
+          <canvas id="webcam-canvas" class="hidden"></canvas>
+        </div>
+        <div class="camera-controls">
+          <button id="capture-btn" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            Capture & Analyze
+          </button>
+          <button id="close-camera-btn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading State Indicator -->
+    <section id="loading-indicator" class="loading-container hidden" role="status" aria-live="assertive">
+      <div class="spinner-ring" aria-hidden="true"></div>
+      <div class="loading-text-group">
+        <h3 id="loading-title">Analyzing visual content...</h3>
+        <p id="loading-step">Running BLIP captioning, YOLO detection & OCR text extraction...</p>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="results-container hidden" aria-labelledby="results-heading">
+      <div class="results-header">
+        <h2 id="results-heading" class="section-title">EchoVision Audio & Vision Report</h2>
+        <span id="exec-time" class="badge badge-info">Processed in 0.0s</span>
+      </div>
+
+      <!-- Primary Audio Narration Card (Highlighted for Accessibility) -->
+      <div class="card audio-hero-card" role="region" aria-label="Spoken audio narration">
+        <div class="audio-hero-header">
+          <div class="audio-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <span>Spoken Narration</span>
+          </div>
+          <div class="playback-speed-controls" role="group" aria-label="Playback speed">
+            <span class="speed-label">Speed:</span>
+            <button class="speed-btn active" data-speed="1.0">1x</button>
+            <button class="speed-btn" data-speed="1.25">1.25x</button>
+            <button class="speed-btn" data-speed="1.5">1.5x</button>
+          </div>
+        </div>
+
+        <p id="narration-transcript" class="narration-text" tabindex="0" aria-label="Spoken description transcript"></p>
+
+        <!-- HTML5 Audio Element -->
+        <audio id="audio-player" class="native-audio" controls preload="auto" aria-label="Accessibility audio player"></audio>
+
+        <div class="audio-extra-controls">
+          <button id="replay-btn" class="btn btn-secondary btn-sm" aria-label="Replay audio from beginning">
+            Replay Audio
+          </button>
+          <button id="browser-speech-btn" class="btn btn-outline btn-sm" aria-label="Read aloud with device browser voice">
+            Read with Browser Voice
+          </button>
+          <a id="download-audio-link" href="#" download="echovision_narration.mp3" class="btn btn-outline btn-sm" aria-label="Download narration MP3 file">
+            Download Audio (.mp3)
+          </a>
+        </div>
+      </div>
+
+      <!-- Detailed Breakdown Cards -->
+      <div class="details-grid">
+        <!-- Visual Comparison View -->
+        <div class="card visual-card">
+          <h3 class="card-title">Visual Scene</h3>
+          <div class="image-viewer-container">
+            <img id="result-image" src="" alt="Analyzed scene uploaded by user" class="result-img">
+            <img id="annotated-image" src="" alt="Scene with detected object bounding boxes" class="result-img hidden">
+          </div>
+          <div id="image-toggle-container" class="image-toggle-group hidden">
+            <button id="show-original-btn" class="btn btn-sm btn-secondary active">Original</button>
+            <button id="show-annotated-btn" class="btn btn-sm btn-outline">Objects Highlighted</button>
+          </div>
+        </div>
+
+        <!-- Breakdown Info -->
+        <div class="card summary-card">
+          <h3 class="card-title">Structured Analysis</h3>
+
+          <div class="info-block">
+            <h4 class="info-label">
+              <span class="icon-dot caption-dot"></span> Scene Caption (BLIP)
+            </h4>
+            <p id="caption-output" class="info-value"></p>
+          </div>
+
+          <div class="info-block">
+            <h4 class="info-label">
+              <span class="icon-dot objects-dot"></span> Detected Objects (YOLO)
+            </h4>
+            <p id="objects-summary-output" class="info-value"></p>
+            <div id="objects-tag-list" class="tag-list" aria-label="Object tag list"></div>
+          </div>
+
+          <div class="info-block">
+            <h4 class="info-label">
+              <span class="icon-dot text-dot"></span> Embedded Text (OCR)
+            </h4>
+            <p id="ocr-output" class="info-value font-mono"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button id="new-analysis-btn" class="btn btn-primary" aria-label="Analyze another image">
+          Analyze Another Image
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-container">
+      <p>&copy; EchoVision &bull; Accessible AI Image-to-Speech Engine &bull; Built with BLIP, YOLOv8 &amp; EasyOCR</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoVision - Analysis Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title"><a href="{{ url_for('index') }}" class="brand-link">EchoVision</a></h1>
+          <p class="brand-subtitle">Analysis Result</p>
+        </div>
+      </div>
+      <div>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">New Analysis</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container" role="main">
+    <div class="results-container">
+      <div class="results-header">
+        <h2 class="section-title">Visual Scene Narration</h2>
+        <span class="badge badge-info">Processed in {{ job.result.execution_time_seconds }}s</span>
+      </div>
+
+      <!-- Spoken Narration Player -->
+      <div class="card audio-hero-card" role="region" aria-label="Spoken audio narration">
+        <div class="audio-hero-header">
+          <div class="audio-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <span>Spoken Narration</span>
+          </div>
+        </div>
+
+        <p class="narration-text" tabindex="0">{{ job.result.narration }}</p>
+
+        {% if job.audio_url %}
+        <audio class="native-audio" controls autoplay preload="auto">
+          <source src="{{ job.audio_url }}" type="audio/mpeg">
+          Your browser does not support audio playback.
+        </audio>
+        <div class="audio-extra-controls">
+          <a href="{{ job.audio_url }}" download class="btn btn-outline btn-sm">Download Audio (.mp3)</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Visual & Analysis Grid -->
+      <div class="details-grid">
+        <div class="card visual-card">
+          <h3 class="card-title">Processed Image</h3>
+          <div class="image-viewer-container">
+            {% if job.annotated_url %}
+            <img src="{{ job.annotated_url }}" alt="Annotated image with object detections" class="result-img">
+            {% else %}
+            <img src="{{ job.image_url }}" alt="Original uploaded image" class="result-img">
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card summary-card">
+          <h3 class="card-title">Detailed Output</h3>
+
+          <div class="info-block">
+            <h4 class="info-label"><span class="icon-dot caption-dot"></span> Scene Caption (BLIP)</h4>
+            <p class="info-value">{{ job.result.caption }}</p>
+          </div>
+
+          <div class="info-block">
+            <h4 class="info-label"><span class="icon-dot objects-dot"></span> Detected Objects (YOLO)</h4>
+            <p class="info-value">{{ job.result.objects_summary }}</p>
+            {% if job.result.objects %}
+            <div class="tag-list">
+              {% for obj in job.result.objects %}
+              <span class="tag">{{ obj.label }} ({{ (obj.confidence * 100)|round|int }}%)</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="info-block">
+            <h4 class="info-label"><span class="icon-dot text-dot"></span> Embedded Text (OCR)</h4>
+            <p class="info-value font-mono">{{ job.result.ocr_text if job.result.ocr_text else "(No text detected)" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Analyze Another Image</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-container">
+      <p>&copy; EchoVision &bull; Accessible AI Image-to-Speech Engine</p>
+    </div>
+  </footer>
+</body>
+</html>
+

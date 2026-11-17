@@ -5,11 +5,15 @@ ENV/
 env/
 
 # Python cache
-_pycache_/
+__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.pkl
+
+# Model weights (YOLO downloads automatically if missing)
+*.pt
+*.pth
 
 # Logs and temp files
 *.log
@@ -22,8 +26,11 @@ _pycache_/
 # VS Code settings
 .vscode/
 
-# Data outputs
-data/outputs/
+# Runtime uploads & outputs
+data/uploads/*
+!data/uploads/.gitkeep
+data/outputs/*
+!data/outputs/.gitkeep
 
 # System files
 .DS_Store
