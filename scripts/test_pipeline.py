@@ -3,12 +3,12 @@ import os
 from pathlib import Path
 
 # Auto-bootstrap: if invoked with global Python, automatically switch to project's virtual environment
-project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-venv_python = os.path.join(project_dir, "venv", "Scripts", "python.exe") if os.name == "nt" else os.path.join(project_dir, "venv", "bin", "python")
-
-if os.path.exists(venv_python) and sys.executable.lower() != os.path.abspath(venv_python).lower():
-    import subprocess
-    sys.exit(subprocess.call([venv_python] + sys.argv))
+if sys.prefix == sys.base_prefix:
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    venv_python = os.path.join(project_dir, "venv", "Scripts", "python.exe") if os.name == "nt" else os.path.join(project_dir, "venv", "bin", "python")
+    if os.path.exists(venv_python):
+        import subprocess
+        sys.exit(subprocess.call([venv_python] + sys.argv))
 
 # Add project root to sys.path so imports resolve cleanly
 sys.path.append(project_dir)
